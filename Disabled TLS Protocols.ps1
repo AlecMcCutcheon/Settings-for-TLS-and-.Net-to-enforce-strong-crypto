@@ -100,7 +100,11 @@ New-ItemProperty –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProvide
 #Get OS information
 $version = [System.Environment]::OSVersion.Version
 
-If (($version.Major -ige 10) -and ($version.Build -ige 18362)){
+#Get OS information
+$version = [System.Environment]::OSVersion.Version
+$OSversion = (Get-CimInstance -ClassName CIM_OperatingSystem).Caption 
+
+If (($version.Major -ige 10) -and ($version.Build -ige 18362) -and ($OSversion -like "*Windows 10*") -or ($OSversion -like "*Windows 11*")){
 New-Item –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols" -Name "TLS 1.3" -Force
 New-Item –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3" -Name "Client" -Force
 New-Item –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3" -Name "Server" -Force
@@ -108,8 +112,9 @@ New-ItemProperty –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProvide
 New-ItemProperty –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server" -Name "Enabled" -PropertyType "DWORD" -value "00000001" -Force
 New-ItemProperty –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client" -Name "DisabledByDefault" -PropertyType "DWORD" -value "00000000" -Force
 New-ItemProperty –Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server" -Name "DisabledByDefault" -PropertyType "DWORD" -value "00000000" -Force
+}else{
+Write-host "OS is not the right version for TLS 1.3"
 }
-{else Write-host "OS is not the right version for TLS 1.3"} 
 
 #WinHttp setting to TLS 1.2
 New-ItemProperty –Path "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp" -Name "DefaultSecureProtocols" -PropertyType "DWORD" -value 0x800  -Force
